@@ -1,0 +1,116 @@
+**Example DataFrame with Missing Values**:
+Let's update the `employee_df` DataFrame to include some missing values and then ask a similar question. We'll add missing values in the `Salary` and `Performance_Score` columns:
+
+```python
+import pandas as pd
+import numpy as np
+
+data = {
+    'Employee_ID': [101, 102, 103, 104, 105, 106],
+    'Department': ['Sales', 'IT', 'HR', 'Sales', 'IT', 'HR'],
+    'Join_Date': ['2019-06-01', '2020-01-15', '2018-03-27', '2021-05-20', '2019-11-11', '2018-07-08'],
+    'Salary': [70000, 90000, 60000, 75000, 85000, np.nan],
+    'Performance_Score': [87, 93, 78, 95, np.nan, 82]
+}
+
+employee_df = pd.DataFrame(data)
+employee_df['Join_Date'] = pd.to_datetime(employee_df['Join_Date'])
+```
+
+**Updated Question**:
+"Using the updated `employee_df` DataFrame with missing values, perform the following tasks:
+1. Identify the highest-earning employee in each department, considering only employees with non-missing salary data. Compile these employees into a new DataFrame.
+2. Calculate the average salary within each department, excluding missing values.
+3. For the highest-earning employees identified in step 1, calculate how many years they have been with the company.
+Provide a Python code snippet to demonstrate these tasks."
+
+**Suggested Answer**:
+```python
+import pandas as pd
+from datetime import datetime
+import numpy as np
+
+# Creating the DataFrame with missing values
+data = {
+    # ... (as above)
+}
+
+employee_df = pd.DataFrame(data)
+employee_df['Join_Date'] = pd.to_datetime(employee_df['Join_Date'])
+
+# Exclude rows with missing salary data
+df_without_missing_salary = employee_df.dropna(subset=['Salary'])
+
+# Find the index of the highest-earning employee in each department
+max_salary_idx = df_without_missing_salary.groupby('Department')['Salary'].idxmax()
+
+# Create a new DataFrame with the highest earners
+highest_earners = employee_df.loc[max_salary_idx]
+
+# Calculate years with the company
+current_date = datetime.now()
+highest_earners['Years_With_Company'] = highest_earners['Join_Date'].apply(lambda x: (current_date - x).days / 365)
+
+# Calculate the average salary within each department, excluding missing values
+average_salary_by_dept = employee_df.groupby('Department')['Salary'].mean()
+
+print("Highest Earners in Each Department:\n", highest_earners)
+print("\nAverage Salary by Department:\n", average_salary_by_dept)
+```
+
+In this code, we first create a filtered DataFrame `df_without_missing_salary` to exclude rows where the `Salary` is missing. This ensures that our search for the highest earners only considers valid salary data. We then proceed as before to find the highest earners and calculate their tenure. Additionally, we compute the average salary within each department using `groupby` and `mean`, which by default excludes NaN values.
+
+This approach provides a detailed view of both the top earners in each department and the overall salary structure within each department, while handling missing data appropriately.
+
+======================================
+**Example R DataFrame with Missing Values**:
+Let's create an R dataframe similar to the Python example, including some missing values in the `Salary` and `Performance_Score` columns. We'll use the `NA` value in R to represent missing data:
+
+```R
+employee_df <- data.frame(
+  Employee_ID = c(101, 102, 103, 104, 105, 106),
+  Department = c("Sales", "IT", "HR", "Sales", "IT", "HR"),
+  Join_Date = as.Date(c("2019-06-01", "2020-01-15", "2018-03-27", "2021-05-20", "2019-11-11", "2018-07-08")),
+  Salary = c(70000, 90000, 60000, 75000, 85000, NA),
+  Performance_Score = c(87, 93, 78, 95, NA, 82)
+)
+```
+
+**Updated Question**:
+"With the given `employee_df` DataFrame in R, perform the following tasks:
+1. Identify the highest-earning employee in each department, considering only employees with non-missing salary data. Compile these employees into a new dataframe.
+2. Calculate the average salary within each department, excluding missing values.
+3. For the highest-earning employees identified in step 1, calculate how many years they have been with the company.
+Provide an R code snippet to demonstrate these tasks."
+
+**Suggested Answer**:
+```R
+library(dplyr)
+library(lubridate)
+
+# Exclude rows with missing salary data
+df_without_missing_salary <- employee_df %>% filter(!is.na(Salary))
+
+# Find the highest-earning employee in each department
+highest_earners <- df_without_missing_salary %>%
+  group_by(Department) %>%
+  slice(which.max(Salary)) %>%
+  ungroup()
+
+# Calculate years with the company
+highest_earners$Years_With_Company <- as.numeric(difftime(Sys.Date(), highest_earners$Join_Date, units = "days")) / 365
+
+# Calculate the average salary within each department, excluding missing values
+average_salary_by_dept <- employee_df %>%
+  group_by(Department) %>%
+  summarize(Average_Salary = mean(Salary, na.rm = TRUE))
+
+print(highest_earners)
+print(average_salary_by_dept)
+```
+
+In this R code, we first filter out the rows with missing salary data using `filter(!is.na(Salary))`. Then, we use `group_by` and `slice` to find the highest earner in each department. The `Years_With_Company` is calculated using `difftime` and converting the difference to years. Finally, the average salary by department is calculated with `mean(Salary, na.rm = TRUE)` within a `summarize` call.
+
+This approach in R mirrors the Python solution, handling missing values and providing insights into the highest earners and average salaries in each department, while accounting for tenure.
+
+======================================
